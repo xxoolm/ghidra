@@ -20,9 +20,12 @@ import ghidra.app.util.SymbolPathParser;
 import ghidra.app.util.bin.format.pdb2.pdbreader.RecordNumber;
 import ghidra.app.util.bin.format.pdb2.pdbreader.type.AbstractComplexMsType;
 import ghidra.app.util.bin.format.pdb2.pdbreader.type.AbstractMsType;
+import ghidra.app.util.demangler.DemangledException;
+import ghidra.app.util.demangler.microsoft.MicrosoftDemangler;
+import ghidra.app.util.demangler.microsoft.MicrosoftMangledContext;
 import ghidra.app.util.pdb.PdbNamespaceUtils;
 import ghidra.util.Msg;
-import mdemangler.*;
+import mdemangler.MDMangUtils;
 import mdemangler.datatype.MDDataType;
 
 /**
@@ -144,11 +147,27 @@ public abstract class AbstractComplexTypeApplier extends MsDataTypeApplier {
 
 	private static SymbolPath getSymbolPathFromMangledTypeName(String mangledString,
 			String fullPathName) {
-		MDMang demangler = new MDMangGhidra();
-		demangler.setErrorOnRemainingChars(true);
-		demangler.setMangledSymbol(mangledString);
+		MicrosoftDemangler mdemangler = new MicrosoftDemangler();
+		// Options, Program, and Address will have no bearing on what we are looking for
+		MicrosoftMangledContext context =
+			mdemangler.createMangledContext(mangledString, null, null, null);
+		// Currently, we are setting the anonymous namespace flag to false to be the same as the
+		// default for when using MDMangGhidra directly (this is happening since we are changing
+		// from using MDMangGhidra directly to using MicrosoftDemangler directly).  We would like
+		// to use the true setting here; however there will always be issues where doing so can
+		// cause other issues.  For instance, setting the value true here has led to a return type
+		// name that does not match the constructor name of the same type (the function name
+		// was a non-mangled name that only contained the `anonymous namespace' namespace and there
+		// was not a matching mangled name for the function (it was a local function).  Thus,
+		// Ghidra's analysis did not recognize the function as a member function with a "this"
+		// pointer of the same type; it had a "void *" type instead of a richer this pointer
+		// type.  We did not dig into where it got steered wrong, but presumed it was because of
+		// what we stated above.
+		context.getOptions().setUseEncodedAnonymousNamespace(false);
+		context.getOptions().setApplyUdtArgumentTypeTag(false);
 		try {
-			MDDataType mdDataType = demangler.demangleType();
+			mdemangler.demangleType(context);
+			MDDataType mdDataType = mdemangler.getMdType();
 			// 20240626:  Ultimately, it might be better to retrieve the Demangled-type to pass
 			// to the DemangledObject.createNamespace() method to convert to a true Ghidra
 			// Namespace that are flagged as functions (not capable at this time) or types or
@@ -158,7 +177,7 @@ public abstract class AbstractComplexTypeApplier extends MsDataTypeApplier {
 			// Could consider the following simplification method instead
 			// return MDMangUtils.getSimpleSymbolPath(mdDataType);
 		}
-		catch (MDException e) {
+		catch (DemangledException e) {
 			// Couldn't demangle.
 			// Message might cause too much noise (we have a fallback, above, to use the regular
 			// name, but this could cause an error... see the notes above about why a mangled
