@@ -2226,12 +2226,12 @@ public class DefaultPdbApplicator implements PdbApplicator {
 	}
 
 	//==============================================================================================
-	void predefineClass(SymbolPath classPath) {
-		if (classPath == null) {
+	void predefineClass(SymbolPath symbolPath) {
+		if (symbolPath == null) {
 			return;
 		}
-		isClassByNamespace.put(classPath, true);
-		for (SymbolPath path = classPath.getParent(); path != null; path = path.getParent()) {
+		isClassByNamespace.put(symbolPath, true);
+		for (SymbolPath path = symbolPath.getParent(); path != null; path = path.getParent()) {
 			if (!isClassByNamespace.containsKey(path)) {
 				isClassByNamespace.put(path, false); // path is simple namespace
 			}
