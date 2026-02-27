@@ -35,17 +35,20 @@ public enum DvrtType implements StructConverter {
 	IMAGE_DYNAMIC_RELOCATION_SWITCHABLE_BRANCH(0x5),
 	IMAGE_DYNAMIC_RELOCATION_ARM64X(0x6),
 	IMAGE_DYNAMIC_RELOCATION_FUNCTION_OVERRIDE(0x7),
-	IMAGE_DYNAMIC_RELOCATION_ARM64_KERNEL_IMPORT_CALL_TRANSFER(0x8);
+	IMAGE_DYNAMIC_RELOCATION_ARM64_KERNEL_IMPORT_CALL_TRANSFER(0x8),
+	IMAGE_DYNAMIC_RELOCATION_UNKNOWN(0x100); // made up to handle unknown types
 	
 	private long value;
+	private int size;
 
 	/**
-	 * Creates a new {@link DvrtType}
+	 * Creates a new 8-byte {@link DvrtType}
 	 * 
 	 * @param value The defined value of the type
 	 */
-	private DvrtType(int value) {
+	private DvrtType(long value) {
 		this.value = value;
+		this.size = 8;
 	}
 
 	/**
@@ -56,24 +59,51 @@ public enum DvrtType implements StructConverter {
 	}
 	
 	/**
-	 * Reads a {@link DvrtType}
+	 * Changes the size of this {@link DvrtType} to the given number of bytes
+	 * 
+	 * @param n The new size in bytes
+	 * @return This {@link DvrtType}, with the new size applied
+	 */
+	public DvrtType changeSize(int n) {
+		this.size = n;
+		return this;
+	}
+
+	/**
+	 * Reads an 8-byte {@link DvrtType}
 	 * 
 	 * @param reader A {@link BinaryReader} that points to the start of the type value
-	 * @return The type that was read, or {@code null} if the value read does not correspond to a
-	 *   valid type
+	 * @return The type that was read, or {@link #IMAGE_DYNAMIC_RELOCATION_UNKNOWN} if the value 
+	 *   read does not correspond to a known type
 	 * @throws IOException if there was an IO-related error
 	 */
-	public static DvrtType type(BinaryReader reader) throws IOException {
+	public static DvrtType type8(BinaryReader reader) throws IOException {
 		long value = reader.readNextLong();
 		return Arrays.stream(DvrtType.values())
 				.filter(e -> value == e.getValue())
 				.findFirst()
-				.orElse(null);
+				.orElse(IMAGE_DYNAMIC_RELOCATION_UNKNOWN);
+	}
+
+	/**
+	 * Reads a 4-byte {@link DvrtType}
+	 * 
+	 * @param reader A {@link BinaryReader} that points to the start of the type value
+	 * @return The type that was read, or {@link #IMAGE_DYNAMIC_RELOCATION_UNKNOWN} if the value 
+	 *   read does not correspond to a known type
+	 * @throws IOException if there was an IO-related error
+	 */
+	public static DvrtType type4(BinaryReader reader) throws IOException {
+		int value = reader.readNextInt();
+		return Arrays.stream(DvrtType.values())
+				.filter(e -> value == e.getValue())
+				.findFirst()
+				.orElse(IMAGE_DYNAMIC_RELOCATION_UNKNOWN);
 	}
 
 	@Override
 	public DataType toDataType() throws DuplicateNameException, IOException {
-		EnumDataType enumDt = new EnumDataType("DvrtType", 8);
+		EnumDataType enumDt = new EnumDataType("DvrtType", size);
 		Arrays.stream(values()).forEach(e -> enumDt.add(e.name(), e.getValue()));
 		enumDt.setCategoryPath(new CategoryPath("/PE"));
 		return enumDt;

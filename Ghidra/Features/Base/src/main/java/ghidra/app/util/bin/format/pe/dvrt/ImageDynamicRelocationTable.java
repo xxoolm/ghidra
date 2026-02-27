@@ -47,18 +47,25 @@ public class ImageDynamicRelocationTable implements StructConverter, PeMarkupabl
 	 * 
 	 * @param reader A {@link BinaryReader} that points to the start of the structure
 	 * @param rva The relative virtual address of the structure
+	 * @param is64bit True if 64-bit; otherwise, false
 	 * @throws IOException if there was an IO-related error
 	 */
-	public ImageDynamicRelocationTable(BinaryReader reader, long rva) throws IOException {
+	public ImageDynamicRelocationTable(BinaryReader reader, long rva, boolean is64bit)
+			throws IOException {
 		this.rva = rva;
 		long origIndex = reader.getPointerIndex();
 
 		version = reader.readNextInt();
 		size = reader.readNextInt();
 
+		if (version != 1) {
+			// TODO: support version 2
+			return;
+		}
+
 		long startIndex = reader.getPointerIndex();
 		for (long i = startIndex; i < startIndex + size; i = reader.getPointerIndex()) {
-			relocations.add(new ImageDynamicRelocation(reader, rva + (i - origIndex)));
+			relocations.add(new ImageDynamicRelocation(reader, rva + (i - origIndex), is64bit));
 		}
 	}
 

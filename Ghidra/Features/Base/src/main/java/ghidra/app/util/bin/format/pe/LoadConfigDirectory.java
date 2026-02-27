@@ -160,7 +160,7 @@ public class LoadConfigDirectory implements StructConverter {
 			if (section != null) {
 				long fileOffset = section.getPointerToRawData() + dynamicValueRelocTableOffset;
 				long rva = section.getVirtualAddress() + dynamicValueRelocTableOffset;
-				dvrt = new ImageDynamicRelocationTable(reader.clone(fileOffset), rva);
+				dvrt = new ImageDynamicRelocationTable(reader.clone(fileOffset), rva, is64bit);
 			}
 			else {
 				Msg.error(this,

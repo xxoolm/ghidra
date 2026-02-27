@@ -40,6 +40,7 @@ public class ImageDynamicRelocation implements StructConverter, PeMarkupable {
 	private int baseRelocSize;
 
 	private long rva;
+	private boolean is64bit;
 	private List<AbstractImageDynamicRelocationHeader> headers = new ArrayList<>();
 
 	/**
@@ -47,13 +48,17 @@ public class ImageDynamicRelocation implements StructConverter, PeMarkupable {
 	 * 
 	 * @param reader A {@link BinaryReader} that points to the start of the structure
 	 * @param rva The relative virtual address of the structure
+	 * @param is64bit True if 64-bit; otherwise, false
 	 * @throws IOException if there was an IO-related error
 	 */
-	public ImageDynamicRelocation(BinaryReader reader, long rva) throws IOException {
+	public ImageDynamicRelocation(BinaryReader reader, long rva, boolean is64bit)
+			throws IOException {
 		this.rva = rva;
+		this.is64bit = is64bit;
 		long origIndex = reader.getPointerIndex();
 		
-		symbol = reader.readNext(DvrtType::type);
+		symbol = is64bit ? reader.readNext(DvrtType::type8)
+				: reader.readNext(DvrtType::type4).changeSize(4);
 		baseRelocSize = reader.readNextInt();
 
 		long startIndex = reader.getPointerIndex();
@@ -69,7 +74,8 @@ public class ImageDynamicRelocation implements StructConverter, PeMarkupable {
 				case IMAGE_DYNAMIC_RELOCATION_ARM64X -> new ImageArm64X(reader, newRva);
 				case IMAGE_DYNAMIC_RELOCATION_FUNCTION_OVERRIDE -> new ImageFunctionOverrideHeader(
 					reader, newRva, baseRelocSize);
-				case null -> new ImageUnsupportedRelocationHeader(reader, newRva, baseRelocSize);
+				case IMAGE_DYNAMIC_RELOCATION_UNKNOWN -> new ImageUnsupportedRelocationHeader(
+					reader, newRva, baseRelocSize);
 				default -> new ImageUnsupportedRelocationHeader(reader, newRva, baseRelocSize);
 			});
 		}
@@ -100,14 +106,19 @@ public class ImageDynamicRelocation implements StructConverter, PeMarkupable {
 		for (AbstractImageDynamicRelocationHeader header : headers) {
 			header.markup(program, isBinary, monitor, log, ntHeader);
 		}
-		listing.setComment(start, CommentType.PLATE,
-			symbol != null ? symbol.name() : "IMAGE_DYNAMIC_RELOCATION_<UNKNOWN>");
+		listing.setComment(start, CommentType.PLATE, symbol.name());
 	}
 
 	@Override
 	public DataType toDataType() throws DuplicateNameException, IOException {
-		StructureDataType struct = new StructureDataType("IMAGE_DYNAMIC_RELOCATION", 0);
-		struct.add(symbol != null ? symbol.toDataType() : QWORD, "Symbol", null);
+		String name ="IMAGE_DYNAMIC_RELOCATION";
+		DataType symbolType = symbol.toDataType();
+		if (symbol == DvrtType.IMAGE_DYNAMIC_RELOCATION_UNKNOWN) {
+			name += "_UNKNOWN";
+			symbolType = is64bit ? QWORD : DWORD;
+		}
+		StructureDataType struct = new StructureDataType(name, 0);
+		struct.add(symbolType, "Symbol", null);
 		struct.add(DWORD, "BaseRelocSize", null);
 		struct.setCategoryPath(new CategoryPath("/PE"));
 		return struct;
