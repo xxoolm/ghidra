@@ -76,12 +76,11 @@ public class BookmarkDBAdapterV3 extends BookmarkDBAdapter {
 					int id = typeIDs[i];
 					String tableName = BOOKMARK_TABLE_NAME + id;
 					Table table = handle.getTable(tableName);
-					if (table == null) {
-						throw new IOException("Missing bookmark table: " + tableName);
-					}
-					int schemaVersion = table.getSchema().getVersion();
-					if (version >= 0 && schemaVersion != version) {
-						throw new IOException("Inconsistent bookmark table versions");
+					if (table != null) {
+						int schemaVersion = table.getSchema().getVersion();
+						if (version >= 0 && schemaVersion != version) {
+							throw new IOException("Inconsistent bookmark table versions");
+						}
 					}
 					tables[id] = table;
 				}
