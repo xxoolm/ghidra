@@ -194,11 +194,9 @@ public class MsdApplyOptionsEditor extends PropertyEditorSupport
 	}
 
 	private MsdApplyOption cloneNamespaceValues() {
-		MsdApplyOption newOptions = new MsdApplyOption();
-		newOptions.setApplySignature(signatureCb.isSelected());
-		newOptions.setApplyCallingConvention(callingConventionCb.isSelected());
-		newOptions.setDemangleOnlyKnownPatterns(knownPatternsCb.isSelected());
-		newOptions.setInterpretation((MsCInterpretation) interpretationComboBox.getSelectedItem());
+		MsdApplyOption newOptions = new MsdApplyOption(knownPatternsCb.isSelected(),
+			signatureCb.isSelected(), callingConventionCb.isSelected(),
+			(MsCInterpretation) interpretationComboBox.getSelectedItem());
 		return newOptions;
 	}
 

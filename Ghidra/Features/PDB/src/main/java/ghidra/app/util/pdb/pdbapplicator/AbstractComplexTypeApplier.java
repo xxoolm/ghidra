@@ -164,7 +164,6 @@ public abstract class AbstractComplexTypeApplier extends MsDataTypeApplier {
 		// type.  We did not dig into where it got steered wrong, but presumed it was because of
 		// what we stated above.
 		context.getOptions().setUseEncodedAnonymousNamespace(false);
-		context.getOptions().setApplyUdtArgumentTypeTag(false);
 		try {
 			mdemangler.demangleType(context);
 			MDDataType mdDataType = mdemangler.getMdType();

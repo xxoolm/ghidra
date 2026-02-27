@@ -135,9 +135,8 @@ public class MsdOutputOptionsEditor extends PropertyEditorSupport implements Cus
 	}
 
 	private MsdOutputOption cloneNamespaceValues() {
-		MsdOutputOption newOption = new MsdOutputOption();
-		newOption.setUseEncodedAnonymousNamespace(useEncodedAnonNsCb.isSelected());
-		newOption.setApplyUdtArgumentTypeTag(useUdtTagsCb.isSelected());
+		MsdOutputOption newOption =
+			new MsdOutputOption(useEncodedAnonNsCb.isSelected(), useUdtTagsCb.isSelected());
 		return newOption;
 	}
 
