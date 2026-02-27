@@ -69,7 +69,7 @@ public class MicrosoftDemanglerOptions extends DemanglerOptions {
 		errorOnRemainingChars = true;
 		interpretation = MsCInterpretation.FUNCTION_IF_EXISTS;
 		useEncodedAnonymousNamespace = true;
-		applyUdtArgumentTypeTag = true;
+		applyUdtArgumentTypeTag = false;
 	}
 
 	/**

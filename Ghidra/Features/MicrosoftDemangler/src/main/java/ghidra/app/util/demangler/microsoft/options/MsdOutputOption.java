@@ -18,6 +18,7 @@ package ghidra.app.util.demangler.microsoft.options;
 import java.util.Objects;
 
 import ghidra.app.plugin.core.analysis.MicrosoftDemanglerAnalyzer;
+import ghidra.app.util.demangler.microsoft.MicrosoftDemanglerOptions;
 import ghidra.framework.options.CustomOption;
 import ghidra.framework.options.GProperties;
 
@@ -33,14 +34,18 @@ public class MsdOutputOption implements CustomOption {
 	private static final String USE_ENCODED_ANONYMOUS_NAMESPACE = "useEncodedAnonymousNamespace";
 	private static final String APPLY_TEMPLATE_ARG_TAGS = "applyTagsTemplateArgumentTags";
 
-	private static boolean DEFAULT_USE_ENCODED_ANONYMOUS_NAMESPACE = true;
-	private static boolean DEFAULT_APPLY_TEMPLATE_ARG_TAGS = true;
-
-	private boolean useEncodedAnonymousNamespace = DEFAULT_USE_ENCODED_ANONYMOUS_NAMESPACE;
-	private boolean applyUdtArgumentTypeTag = DEFAULT_APPLY_TEMPLATE_ARG_TAGS;
+	private boolean useEncodedAnonymousNamespace;
+	private boolean applyUdtArgumentTypeTag;
 
 	public MsdOutputOption() {
-		// required for persistence
+		// required for persistence, but must set some initial values even though they will
+		//  get overridden by writeState.
+		this(false, false);
+	}
+
+	public MsdOutputOption(boolean useEncodedAnonymousNamespace, boolean applyUdtArgumentTypeTag) {
+		this.useEncodedAnonymousNamespace = useEncodedAnonymousNamespace;
+		this.applyUdtArgumentTypeTag = applyUdtArgumentTypeTag;
 	}
 
 	/**

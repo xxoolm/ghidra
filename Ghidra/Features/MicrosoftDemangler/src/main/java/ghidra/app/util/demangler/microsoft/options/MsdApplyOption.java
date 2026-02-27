@@ -38,20 +38,20 @@ public class MsdApplyOption extends DemanglerOptions implements CustomOption {
 	private static final String APPLY_CALLING_CONVENTION = "applyFunctionCallingConventions";
 	private static final String MS_C_INTERPRETATION = "C-StyleSymbolInterpretation";
 
-	private static boolean DEFAULT_DEMANGLE_USE_KNOWN_PATTERNS = false;
-	private static boolean DEFAULT_APPLY_SIGNATURE = true;
-	private static boolean DEFAULT_APPLY_CALLING_CONVENTION = true;
-	private static MsCInterpretation DEFAULT_MS_C_INTERPRETATION =
-		MsCInterpretation.FUNCTION_IF_EXISTS;
-
 	private MsCInterpretation interpretation;
 
 	public MsdApplyOption() {
-		// required for persistence, but also using for overriding initializations of parent
-		setDemangleOnlyKnownPatterns(DEFAULT_DEMANGLE_USE_KNOWN_PATTERNS);
-		setApplySignature(DEFAULT_APPLY_SIGNATURE);
-		setApplyCallingConvention(DEFAULT_APPLY_CALLING_CONVENTION);
-		interpretation = DEFAULT_MS_C_INTERPRETATION;
+		// required for persistence, but must set some initial values even though they will
+		//  get overridden by writeState.
+		this(false, false, false, MsCInterpretation.FUNCTION_IF_EXISTS);
+	}
+
+	public MsdApplyOption(boolean demangleOnlyKnownPatternsArg, boolean applySignatureArg,
+			boolean applyCallingConventionArg, MsCInterpretation interpretationArg) {
+		setDemangleOnlyKnownPatterns(demangleOnlyKnownPatternsArg);
+		setApplySignature(applySignatureArg);
+		setApplyCallingConvention(applyCallingConventionArg);
+		interpretation = interpretationArg;
 	}
 
 	/**
