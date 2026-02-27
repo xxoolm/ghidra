@@ -72,6 +72,11 @@ public abstract class AbstractComplexTypeApplier extends MsDataTypeApplier {
 	 */
 	//return mine or my def's (and set mine)
 	SymbolPath getFixedSymbolPath(AbstractComplexMsType type) {
+		CppCompositeType compType = applicator.getClassType(type);
+		if (compType != null) {
+			// Return path if it has already been processed
+			return compType.getSymbolPath();
+		}
 		SymbolPath path = getSymbolPath(type);
 		RecordNumber mappedNumber = applicator.getMappedRecordNumber(type.getRecordNumber());
 		Integer num = mappedNumber.getNumber();
