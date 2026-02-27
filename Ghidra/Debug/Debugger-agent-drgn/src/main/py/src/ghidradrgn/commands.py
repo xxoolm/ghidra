@@ -272,10 +272,10 @@ def ghidra_trace_create(start_trace: bool = True) -> None:
     elif kind == "coredump":
         img = os.getenv('OPT_TARGET_IMG')
         if img is None:
-			return
+            return
         prog.set_core_dump(img)
         if '/' in img:
-			img = img[img.rindex('/')+1:]
+            img = img[img.rindex('/')+1:]
     else:
         pid = os.getenv('OPT_TARGET_PID')
         if pid is not None:
