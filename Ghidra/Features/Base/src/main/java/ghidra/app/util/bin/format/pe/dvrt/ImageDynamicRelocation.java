@@ -82,7 +82,7 @@ public class ImageDynamicRelocation implements StructConverter, PeMarkupable {
 	}
 
 	/**
-	 * {@return the relocation "symbol", which is really a {@link DvrtType type}
+	 * {@return the relocation "symbol", which is really a {@link DvrtType type}}
 	 */
 	public DvrtType getSymbol() {
 		return symbol;

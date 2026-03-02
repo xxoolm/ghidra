@@ -78,7 +78,7 @@ public class ImageFunctionOverrideHeader extends AbstractImageDynamicRelocationH
 	}
 
 	/**
-	 * {@return the {@link List} of {@link ImageFunctionOverrideDynamicRelocation}s
+	 * {@return the {@link List} of {@link ImageFunctionOverrideDynamicRelocation}s}
 	 */
 	public List<ImageFunctionOverrideDynamicRelocation> getFuncOverrideInfo() {
 		return funcOverrideInfos;
